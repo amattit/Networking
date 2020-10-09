@@ -18,7 +18,7 @@ public protocol WebRepository {
 @available(OSX 10.15, *)
 @available(iOS 13, *)
 extension WebRepository {
-    func call<Value>(endpoint: APICall, httpCodes: HTTPCodes = .success) -> AnyPublisher<Value, Error>
+    open func call<Value>(endpoint: APICall, httpCodes: HTTPCodes = .success) -> AnyPublisher<Value, Error>
         where Value: Decodable {
         do {
             let request = try endpoint.urlRequest(baseURL: baseURL)
