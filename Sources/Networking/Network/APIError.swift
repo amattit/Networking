@@ -16,7 +16,7 @@ public enum APIError: Swift.Error {
 }
 
 extension APIError: LocalizedError {
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidURL:           return "Не удалось собрать Адрес"
         case .httpCode(let code):   return "Не ожидаемый HTTP код: \(code)"
