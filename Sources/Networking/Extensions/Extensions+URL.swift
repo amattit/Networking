@@ -1,8 +1,9 @@
 //
-//  File.swift
-//  
+//  Extensions+URL.swift
+//  Networking
 //
-//  Created by 16997598 on 09.10.2020.
+//  Created by Mikhail Seregin on 11.03.2020.
+//  Copyright © 2020 Mikhail Seregin. All rights reserved.
 //
 
 import Foundation

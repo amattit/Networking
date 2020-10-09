@@ -1,9 +1,9 @@
 //
-//  ApiCall.swift
-//  SmartCalendarSwiftUI
+//  APICall.swift
+//  Networking
 //
-//  Created by Серегин Михаил on 19.02.2020.
-//  Copyright © 2020 Alexander Martynenko. All rights reserved.
+//  Created by Mikhail Seregin on 11.03.2020.
+//  Copyright © 2020 Mikhail Seregin. All rights reserved.
 //
 
 import Foundation
