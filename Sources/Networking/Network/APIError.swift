@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum APIError: Swift.Error {
+public enum APIError: Swift.Error {
     
     case invalidURL
     case httpCode(HTTPCode)

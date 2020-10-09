@@ -8,7 +8,7 @@
 
 import Foundation
 
-protocol APICall {
+public protocol APICall {
     var path: String { get }
     var method: String { get }
     var headers: [String: String]? { get }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-class ImageUploader {
+public class ImageUploader {
     
     func upload(parameters: [[String : Any]]) throws {
         let boundary = "Boundary-\(UUID().uuidString)"

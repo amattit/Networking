@@ -9,7 +9,7 @@
 import Foundation
 import Combine
 
-protocol WebRepository {
+public protocol WebRepository {
     var session: URLSession { get }
     var baseURL: String { get }
     var queue: DispatchQueue { get }
@@ -77,8 +77,8 @@ class UteamJSONDecoder: JSONDecoder {
     }
 }
 
-struct Empty: Codable {}
+public struct Empty: Codable {}
 
-struct ErrorDto: Codable {
+public struct ErrorDto: Codable {
     let message: String
 }
