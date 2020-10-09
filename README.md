@@ -80,3 +80,5 @@ public func fetchUserBy(_ id: UUID) {
         .store(in: &store)
 }
 ```
+# Внимание
+JSONDecoder по умолчанию работает с форматом даты ISO8601
