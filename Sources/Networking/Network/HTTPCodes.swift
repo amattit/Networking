@@ -11,5 +11,5 @@ public typealias HTTPCode = Int
 public typealias HTTPCodes = Range<HTTPCode>
 
 extension HTTPCodes {
-    static let success = 200 ..< 300
+    public static let success = 200 ..< 300
 }
