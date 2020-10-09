@@ -17,7 +17,7 @@ public protocol APICall {
 }
 
 extension APICall {
-    func urlRequest(baseURL: String) throws -> URLRequest {
+    open func urlRequest(baseURL: String) throws -> URLRequest {
         
         var queryItems = [URLQueryItem]()
         if let query = query {
