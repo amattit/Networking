@@ -13,11 +13,6 @@ public protocol WebRepository {
     var session: URLSession { get }
     var baseURL: String { get }
     var queue: DispatchQueue { get }
-    
-    @available(OSX 10.15, *)
-    @available(iOS 13.0, *)
-    func call<Value, E>(endpoint: APICall, httpCodes: HTTPCodes, decoder: JSONDecoder, errorType: E.Type) -> AnyPublisher<Value, E>
-    where Value: Decodable, E: Decodable
 }
 
 @available(OSX 10.15, *)
