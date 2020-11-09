@@ -16,15 +16,20 @@ public protocol WebRepository {
     
     @available(OSX 10.15, *)
     @available(iOS 13.0, *)
-    func call<Value>(endpoint: APICall, httpCodes: HTTPCodes, decoder: JSONDecoder) -> AnyPublisher<Value, Error>
-        where Value: Decodable
+    func call<Value, E>(endpoint: APICall, httpCodes: HTTPCodes, decoder: JSONDecoder) -> AnyPublisher<Value, E>
+    where Value: Decodable, E: Decodable
 }
 
 @available(OSX 10.15, *)
 @available(iOS 13, *)
 extension WebRepository {
-    public func call<Value>(endpoint: APICall, httpCodes: HTTPCodes = .success, decoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<Value, Error>
-        where Value: Decodable {
+    public func call<Value, E>(
+        endpoint: APICall,
+        httpCodes: HTTPCodes = .success,
+        decoder: JSONDecoder = JSONDecoder(),
+        errorType: E.Type
+    ) -> AnyPublisher<Value, Error>
+        where Value: Decodable, E: Decodable {
         do {
             let request = try endpoint.urlRequest(baseURL: baseURL)
             print(request)
@@ -32,7 +37,7 @@ extension WebRepository {
                 .dataTaskPublisher(for: request)
                 .subscribe(on: queue)
                 .print()
-                .requestJSON(httpCodes: httpCodes, decoder: decoder)
+                .requestJSON(httpCodes: httpCodes, decoder: decoder, errorType: E.self)
                 
         } catch let error {
             return Fail<Value, Error>(error: error)
@@ -44,17 +49,27 @@ extension WebRepository {
 @available(OSX 10.15, *)
 @available(iOS 13, *)
 private extension Publisher where Output == URLSession.DataTaskPublisher.Output {
-    func requestJSON<Value>(httpCodes: HTTPCodes, decoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<Value, Error> where Value: Decodable {
+    func requestJSON<Value, E>(
+        httpCodes: HTTPCodes,
+        decoder: JSONDecoder = JSONDecoder(),
+        errorType: E.Type
+    ) -> AnyPublisher<Value, Error>
+        where
+        Value: Decodable,
+        E: Decodable
+    {
         return tryMap {
             assert(!Thread.isMainThread)
             guard let code = ($0.1 as? HTTPURLResponse)?.statusCode else {
                 throw APIError.unexpectedResponse
             }
             guard httpCodes.contains(code) else {
-                guard let description = ($0.1 as? HTTPURLResponse)?.description else {
-                    throw APIError.httpCode(code)
-                }
-                throw APIError.custom(description)
+//                guard let description = ($0.1 as? HTTPURLResponse)?.description else {
+//                    throw APIError.httpCode(code)
+//                }
+                
+                let error = try decoder.decode(E.self, from: $0.0)
+                throw APIError.decodable(error)
             }
             
             if $0.0.count == 0 {

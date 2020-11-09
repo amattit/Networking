@@ -14,6 +14,7 @@ public enum APIError: Swift.Error {
     case httpCode(HTTPCode)
     case unexpectedResponse
     case custom(String)
+    case decodable(Decodable)
 }
 
 extension APIError: LocalizedError {
@@ -23,6 +24,7 @@ extension APIError: LocalizedError {
         case .httpCode(let code):   return "Не ожидаемый HTTP код: \(code)"
         case .unexpectedResponse:   return "Не ожидаемый ответ от сервера"
         case .custom(let message):  return message
+        case .decodable:               return "Не ожидаемый ответ"
         }
     }
 }
