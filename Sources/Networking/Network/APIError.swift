@@ -27,4 +27,13 @@ extension APIError: LocalizedError {
         case .decodable:               return "Не ожидаемый ответ"
         }
     }
+    
+    public var decodable: Decodable? {
+        switch self {
+        case .decodable(let decodable):
+            return decodable
+        default:
+            return nil
+        }
+    }
 }
