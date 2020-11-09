@@ -16,7 +16,7 @@ public protocol WebRepository {
     
     @available(OSX 10.15, *)
     @available(iOS 13.0, *)
-    func call<Value, E>(endpoint: APICall, httpCodes: HTTPCodes, decoder: JSONDecoder) -> AnyPublisher<Value, E>
+    func call<Value, E>(endpoint: APICall, httpCodes: HTTPCodes, decoder: JSONDecoder, errorType: E.Type) -> AnyPublisher<Value, E>
     where Value: Decodable, E: Decodable
 }
 
