@@ -55,7 +55,7 @@ extension WebRepository {
         }
     }
     
-    func callData<E>(
+    public func callData<E>(
         endpoint: APICall,
         httpCodes: HTTPCodes,
         decoder: JSONDecoder,
