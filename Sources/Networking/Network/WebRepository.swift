@@ -112,4 +112,6 @@ private extension Publisher where Output == URLSession.DataTaskPublisher.Output 
     }
 }
 
-public struct Empty: Codable {}
+public struct Empty: Codable {
+    public init() {}
+}
