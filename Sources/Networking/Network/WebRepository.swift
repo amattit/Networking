@@ -45,6 +45,7 @@ extension WebRepository {
             print(request)
             return session
                 .dataTaskPublisher(for: request)
+                .retry(2)
                 .subscribe(on: queue)
                 .print()
                 .requestJSON(httpCodes: httpCodes, decoder: decoder, errorType: E.self)
@@ -66,6 +67,7 @@ extension WebRepository {
             let request = try endpoint.urlRequest(baseURL: baseURL)
             return session
                 .dataTaskPublisher(for: request)
+                .retry(2)
                 .subscribe(on: queue)
                 .tryMap { $0.data }
                 .eraseToAnyPublisher()
