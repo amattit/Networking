@@ -46,8 +46,9 @@ extension WebRepository {
             return session
                 .dataTaskPublisher(for: request)
                 .subscribe(on: queue)
-                .retry(2)
                 .requestJSON(httpCodes: httpCodes, decoder: decoder, errorType: E.self)
+                .retry(2)
+                .eraseToAnyPublisher()
                 
         } catch let error {
             return Fail<Value, Error>(error: error)
@@ -95,8 +96,7 @@ private extension Publisher where Output == URLSession.DataTaskPublisher.Output 
                 throw APIError.unexpectedResponse
             }
             guard httpCodes.contains(code) else {
-                let error = try decoder.decode(E.self, from: $0.0)
-                throw APIError.decodable(error)
+                throw APIError.httpCode(code)
             }
             
             if $0.0.count == 0 {
@@ -128,5 +128,35 @@ extension Data {
               let prettyPrintedString = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else { return nil }
 
         return prettyPrintedString
+    }
+}
+
+fileprivate extension Publishers {
+    struct RetryIf<P: Publisher>: Publisher {
+        typealias Output = P.Output
+        typealias Failure = P.Failure
+        
+        let publisher: P
+        let times: Int
+        let condition: (P.Failure) -> Bool
+        
+        func receive<S>(subscriber: S) where S: Subscriber, Failure == S.Failure, Output == S.Input {
+            guard times > 0 else { return publisher.receive(subscriber: subscriber) }
+            
+            publisher.catch { (error: P.Failure) -> AnyPublisher<Output, Failure> in
+                if condition(error) {
+                    return RetryIf(
+                        publisher: publisher,
+                        times: times - 1,
+                        condition: condition
+                    )
+                    .eraseToAnyPublisher()
+                } else {
+                    return Fail(error: error)
+                        .eraseToAnyPublisher()
+                }
+            }
+            .receive(subscriber: subscriber)
+        }
     }
 }
