@@ -45,9 +45,8 @@ extension WebRepository {
             print(request)
             return session
                 .dataTaskPublisher(for: request)
-                .retry(2)
                 .subscribe(on: queue)
-                .print()
+                .retry(2)
                 .requestJSON(httpCodes: httpCodes, decoder: decoder, errorType: E.self)
                 
         } catch let error {
@@ -67,9 +66,9 @@ extension WebRepository {
             let request = try endpoint.urlRequest(baseURL: baseURL)
             return session
                 .dataTaskPublisher(for: request)
-                .retry(2)
                 .subscribe(on: queue)
                 .tryMap { $0.data }
+                .retry(2)
                 .eraseToAnyPublisher()
         } catch let error {
             return Fail<Data, Error>(error: error)
@@ -105,7 +104,11 @@ private extension Publisher where Output == URLSession.DataTaskPublisher.Output 
                 let data = try JSONEncoder().encode(empty)
                 return data
             }
-            NSLog(String(data: $0.0, encoding: .utf8) ?? "Нет Ошибки?")
+            
+            if let pretty = $0.0.prettyPrintedJSONString {
+                Swift.print(pretty)
+            }
+//            NSLog(String(data: $0.0, encoding: .utf8) ?? "Нет Ошибки?")
             return $0.0
         }
         .decode(type: Value.self, decoder: decoder)
@@ -116,4 +119,14 @@ private extension Publisher where Output == URLSession.DataTaskPublisher.Output 
 
 public struct Empty: Codable {
     public init() {}
+}
+
+extension Data {
+    var prettyPrintedJSONString: NSString? { /// NSString gives us a nice sanitized debugDescription
+        guard let object = try? JSONSerialization.jsonObject(with: self, options: []),
+              let data = try? JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted]),
+              let prettyPrintedString = NSString(data: data, encoding: String.Encoding.utf8.rawValue) else { return nil }
+
+        return prettyPrintedString
+    }
 }
