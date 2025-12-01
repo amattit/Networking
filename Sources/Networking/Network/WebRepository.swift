@@ -28,11 +28,81 @@ public protocol WebRepository {
         errorType: E.Type
     ) -> AnyPublisher<Data, Error>
         where E: Decodable
+    
+    func call<Value>(
+        endpoint: APICall,
+        httpCodes: HTTPCodes,
+        decoder: JSONDecoder
+    ) async throws -> Value
+        where Value: Decodable
+    
+    func callData(
+        endpoint: APICall,
+        httpCodes: HTTPCodes,
+        decoder: JSONDecoder
+    ) async throws -> Data
+    
+    func callEmpty(
+        endpoint: APICall,
+        httpCodes: HTTPCodes
+    ) async throws
+
 }
 
 @available(OSX 10.15, *)
 @available(iOS 13, *)
 extension WebRepository {
+    public func call<Value>(
+        endpoint: APICall,
+        httpCodes: HTTPCodes,
+        decoder: JSONDecoder
+    ) async throws -> Value
+    where Value: Decodable {
+        let request = try endpoint.urlRequest(baseURL: baseURL)
+        print(request)
+        let (data, response) = try await session.data(for: request)
+        try checkHTTPStatus(response: response, httpCodes: httpCodes, data: data)
+        return try decode(data: data, decoder: decoder)
+    }
+    
+    public func callData(
+        endpoint: APICall,
+        httpCodes: HTTPCodes,
+        decoder: JSONDecoder
+    ) async throws -> Data {
+        let request = try endpoint.urlRequest(baseURL: baseURL)
+        print(request)
+        let (data, response) = try await session.data(for: request)
+        try checkHTTPStatus(response: response, httpCodes: httpCodes, data: data)
+        return data
+    }
+    
+    public func callEmpty(
+        endpoint: APICall,
+        httpCodes: HTTPCodes
+    ) async throws {
+        let request = try endpoint.urlRequest(baseURL: baseURL)
+        print(request)
+        let (data, response) = try await session.data(for: request)
+        try checkHTTPStatus(response: response, httpCodes: httpCodes, data: data)
+    }
+    
+    private func checkHTTPStatus(response: URLResponse, httpCodes: HTTPCodes, data: Data) throws {
+        let responseCode = (response as? HTTPURLResponse)?.statusCode ?? 0
+        guard httpCodes.contains(responseCode) else {
+            if data.count > 0 {
+                let error = try JSONDecoder().decode(String.self, from: data)
+                throw APIError.custom(error)
+            } else {
+                throw APIError.httpCode(responseCode)
+            }
+        }
+    }
+    
+    private func decode<Value: Decodable>(data: Data, decoder: JSONDecoder) throws -> Value {
+        return try decoder.decode(Value.self, from: data)
+    }
+    
     public func call<Value, E>(
         endpoint: APICall,
         httpCodes: HTTPCodes = .success,
